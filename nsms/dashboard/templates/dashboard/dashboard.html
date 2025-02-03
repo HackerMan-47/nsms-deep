@@ -1,0 +1,92 @@
+{% extends 'dashboard/base.html' %}
+
+{% block content %}
+<script>
+    const ws = new WebSocket('ws://localhost:8000/ws/alerts/');
+    ws.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        const alertsTable = document.getElementById('alerts-table');
+        const newRow = alertsTable.insertRow(-1);
+        newRow.innerHTML = `
+            <td>${new Date().toLocaleString()}</td>
+            <td>${data.message.source_ip}</td>
+            <td>${data.message.threat_type}</td>
+            <td><span class="badge bg-${data.message.severity.toLowerCase()}">${data.message.severity}</span></td>
+        `;
+    };
+</script>
+
+<h1>Dashboard</h1>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Captured Packets</div>
+            <div class="card-body">
+                <h5 class="card-title">5,390</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Active Alerts</div>
+            <div class="card-body">
+                <h5 class="card-title">1</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Rules Status</div>
+            <div class="card-body">
+                <h5 class="card-title">1 Active</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2>Alerts</h2>
+<table class="table table-striped" id="alerts-table">
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Source IP</th>
+            <th>Threat Type</th>
+            <th>Severity</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for alert in alerts %}
+        <tr>
+            <td>{{ alert.timestamp }}</td>
+            <td>{{ alert.source_ip }}</td>
+            <td>{{ alert.threat_type }}</td>
+            <td><span class="badge bg-{{ alert.severity|lower }}">{{ alert.severity }}</span></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Packets</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Timestamp</th>
+            <th>Source IP</th>
+            <th>Destination IP</th>
+            <th>Protocol</th>
+            <th>Length</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for packet in packets %}
+        <tr>
+            <td>{{ packet.timestamp }}</td>
+            <td>{{ packet.source_ip }}</td>
+            <td>{{ packet.destination_ip }}</td>
+            <td>{{ packet.protocol }}</td>
+            <td>{{ packet.length }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
